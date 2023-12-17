@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Add styling for bars */
+    .bar-container {
+      display: flex;
+      align-items: flex-end;
+      height: 200px; /* Adjust height as needed */
+    }
+
+    .bar {
+      flex: 1;
+      background-color: #3498db;
+      margin: 0 2px;
+    }
+  </style>
+  <title>Sorting Visualizer</title>
+</head>
+<body>
+  <button onclick="randomizeArray()">Randomize Array</button>
+  <button onclick="insertionSort()">Insertion Sort</button>
+  <button onclick="selectionSort()">Selection Sort</button>
+  <button onclick="bubbleSort()">Bubble Sort</button>
+  <button onclick="quickSort()">Quick Sort</button>
+  <button onclick="mergeSort()">Merge Sort</button>
+  <button onclick="shellSort()">Shell Sort</button>
+  <button onclick="changeSize()">Change Size</button>
+  <div id="barsContainer" class="bar-container"></div>
+
+  <script>
+    let bars = [];
+
+    // Function to initialize bars with random heights
+    function initializeBars() {
+      const barsContainer = document.getElementById("barsContainer");
+      barsContainer.innerHTML = ""; // Clear existing bars
+
+      bars = Array.from({ length: 20 }, () => {
+        const height = Math.floor(Math.random() * 100) + 10; // Adjust range as needed
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        bar.style.height = ${height}px;
+        barsContainer.appendChild(bar);
+
+        return { height, element: bar };
+      });
+    }
+
+    // Function to swap bars in the DOM
+    function swapBars(index1, index2) {
+      const temp = bars[index1];
+      bars[index1] = bars[index2];
+      bars[index2] = temp;
+
+      const barsContainer = document.getElementById("barsContainer");
+      barsContainer.innerHTML = "";
+      bars.forEach(bar => barsContainer.appendChild(bar.element));
+    }
+
+    // Sorting Algorithms
+
+    // Bubble Sort Algorithm
+    async function bubbleSort() {
+      for (let i = 0; i < bars.length - 1; i++) {
+        for (let j = 0; j < bars.length - i - 1; j++) {
+          if (bars[j].height > bars[j + 1].height) {
+            swapBars(j, j + 1);
+            await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+          }
+        }
+      }
+    }
+
+    // Insertion Sort Algorithm
+    async function insertionSort() {
+      for (let i = 1; i < bars.length; i++) {
+        let key = bars[i].height;
+        let j = i - 1;
+        while (j >= 0 && bars[j].height > key) {
+          swapBars(j, j + 1);
+          j--;
+          await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+        }
+        bars[j + 1].height = key;
+        bars[j + 1].element.style.height = ${key}px;
+      }
+    }
+
+    // Selection Sort Algorithm
+    async function selectionSort() {
+      for (let i = 0; i < bars.length - 1; i++) {
+        let minIndex = i;
+        for (let j = i + 1; j < bars.length; j++) {
+          if (bars[j].height < bars[minIndex].height) {
+            minIndex = j;
+          }
+        }
+        swapBars(i, minIndex);
+        await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+      }
+    }
+
+    // Quick Sort Algorithm
+    async function quickSort() {
+      async function partition(low, high) {
+        let pivot = bars[high].height;
+        let i = low - 1;
+
+        for (let j = low; j < high; j++) {
+          if (bars[j].height < pivot) {
+            i++;
+            swapBars(i, j);
+            await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+          }
+        }
+
+        swapBars(i + 1, high);
+        await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+        return i + 1;
+      }
+
+      async function sort(low, high) {
+        if (low < high) {
+          let pi = await partition(low, high);
+
+          await sort(low, pi - 1);
+          await sort(pi + 1, high);
+        }
+      }
+
+      await sort(0, bars.length - 1);
+    }
+
+    // Merge Sort Algorithm
+    async function mergeSort() {
+      async function merge(l, m, r) {
+        let n1 = m - l + 1;
+        let n2 = r - m;
+
+        let L = new Array(n1);
+        let R = new Array(n2);
+
+        for (let i = 0; i < n1; i++) {
+          L[i] = bars[l + i].height;
+        }
+        for (let j = 0; j < n2; j++) {
+          R[j] = bars[m + 1 + j].height;
+        }
+
+        let i = 0;
+        let j = 0;
+        let k = l;
+
+        while (i < n1 && j < n2) {
+          if (L[i] <= R[j]) {
+            bars[k].height = L[i];
+            bars[k].element.style.height = ${L[i]}px;
+            i++;
+          } else {
+            bars[k].height = R[j];
+            bars[k].element.style.height = ${R[j]}px;
+            j++;
+          }
+          k++;
+          await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+        }
+
+        while (i < n1) {
+          bars[k].height = L[i];
+          bars[k].element.style.height = ${L[i]}px;
+          i++;
+          k++;
+          await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+        }
+
+        while (j < n2) {
+          bars[k].height = R[j];
+          bars[k].element.style.height = ${R[j]}px;
+          j++;
+          k++;
+          await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+        }
+      }
+
+      async function sort(l, r) {
+        if (l < r) {
+          let m = Math.floor((l + r) / 2);
+          await sort(l, m);
+          await sort(m + 1, r);
+          await merge(l, m, r);
+        }
+      }
+
+      await sort(0, bars.length - 1);
+    }
+     // Shell Sort Algorithm
+    async function shellSort() {
+      let n = bars.length;
+      for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
+        for (let i = gap; i < n; i++) {
+          let temp = bars[i].height;
+          let j = i;
+
+          while (j >= gap && bars[j - gap].height > temp) {
+            bars[j].height = bars[j - gap].height;
+            bars[j].element.style.height = `${bars[j].height}px`;
+            j -= gap;
+            await new Promise(resolve => setTimeout(resolve, 100)); // Delay for visualization
+          }
+
+          bars[j].height = temp;
+          bars[j].element.style.height = `${temp}px`;
+        }
+      }
+    }
+      function randomizeArray() {
+      initializeBars();
+    }
+
+    // Function to change bar sizes
+    function changeSize() {
+      bars.forEach(bar => {
+        const newHeight = Math.floor(Math.random() * 100) + 10;
+        bar.height = newHeight;
+        bar.element.style.height = ${newHeight}px;
+      });
+    }
+
+    // Initialize bars on page load
+    window.onload = function () {
+      initializeBars();
+    };
+  </script>
+</body>
+</html>
